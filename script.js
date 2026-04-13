@@ -1,55 +1,88 @@
-:root {
-    --primary: #6366f1;
-    --secondary: #4f46e5;
-    --success: #22c55e;
-    --danger: #ef4444;
-    --bg: #f8fafc;
-    --card: #ffffff;
-    --text: #1e293b;
+let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+let myChart = null;
+
+const form = document.getElementById('expense-form');
+const list = document.getElementById('expense-list');
+const totalDisplay = document.getElementById('total-amount');
+
+// Initialize App
+function init() {
+    document.getElementById('current-date').innerText = new Date().toDateString();
+    updateUI();
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); padding: 20px; }
+function updateUI() {
+    list.innerHTML = '';
+    let total = 0;
+    const categoryTotals = {};
 
-.app-container { max-width: 500px; margin: 0 auto; }
+    expenses.forEach((item) => {
+        total += parseFloat(item.amount);
+        
+        // Track category totals for the chart
+        categoryTotals[item.category] = (categoryTotals[item.category] || 0) + parseFloat(item.amount);
 
-header { margin-bottom: 2rem; text-align: center; }
-header h1 { font-weight: 700; color: var(--primary); letter-spacing: -1px; }
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <div class="expense-info">
+                <strong>${item.description}</strong>
+                <small>${item.category}</small>
+            </div>
+            <div class="expense-amount">
+                -$${item.amount}
+                <button onclick="deleteItem(${item.id})" class="text-btn" style="margin-left:10px">✕</button>
+            </div>
+        `;
+        list.appendChild(li);
+    });
 
-.summary-card {
-    background: var(--card);
-    padding: 2rem;
-    border-radius: 20px;
-    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-    margin-bottom: 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    totalDisplay.innerText = total.toFixed(2);
+    localStorage.setItem('expenses', JSON.stringify(expenses));
+    updateChart(categoryTotals);
 }
 
-.chart-container { width: 100%; max-width: 200px; margin-top: 1rem; }
+function updateChart(data) {
+    const ctx = document.getElementById('expenseChart').getContext('2d');
+    
+    if (myChart) myChart.destroy(); // Destroy old chart instance to prevent memory leaks
 
-.input-section { background: var(--card); padding: 1.5rem; border-radius: 15px; margin-bottom: 2rem; }
-.input-group { display: flex; gap: 10px; margin-bottom: 10px; }
-input, select { flex: 1; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; }
-
-button#add-btn {
-    flex: 1; background: var(--primary); color: white; border: none;
-    padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer;
+    myChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(data),
+            datasets: [{
+                data: Object.values(data),
+                backgroundColor: ['#6366f1', '#22c55e', '#ef4444', '#f59e0b', '#06b6d4'],
+                borderWidth: 0
+            }]
+        },
+        options: { plugins: { legend: { display: false } } }
+    });
 }
 
-.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-.text-btn { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 12px; }
+form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const newItem = {
+        id: Date.now(),
+        description: document.getElementById('desc').value,
+        amount: document.getElementById('amount').value,
+        category: document.getElementById('category').value
+    };
+    expenses.push(newItem);
+    updateUI();
+    form.reset();
+});
 
-li {
-    background: var(--card); padding: 1rem; border-radius: 12px; margin-bottom: 10px;
-    display: flex; justify-content: space-between; align-items: center;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    transition: transform 0.2s;
+function deleteItem(id) {
+    expenses = expenses.filter(item => item.id !== id);
+    updateUI();
 }
 
-li:hover { transform: translateX(5px); }
-.expense-info { display: flex; flex-direction: column; }
-.expense-info strong { font-size: 15px; }
-.expense-info small { color: #64748b; font-size: 12px; }
-.expense-amount { font-weight: 700; color: var(--text); }
+document.getElementById('clear-all').addEventListener('click', () => {
+    if (confirm("Clear all data?")) {
+        expenses = [];
+        updateUI();
+    }
+});
+
+init();
