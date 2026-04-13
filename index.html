@@ -3,38 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Expense Tracker</title>
+    <title>ExpenseFlow | Advanced Tracker</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h2>Expense Tracker</h2>
-        
-        <div id="balance-container">
-            <p>Total Spending</p>
-            <h3>$<span id="total-amount">0.00</span></h3>
-        </div>
+    <div class="app-container">
+        <header>
+            <h1>ExpenseFlow</h1>
+            <p id="current-date"></p>
+        </header>
 
-        <form id="expense-form">
-            <input type="text" id="desc" placeholder="Expense description..." required>
-            <input type="number" id="amount" placeholder="Amount ($)" step="0.01" required>
-            <select id="category">
-                <option value="Food">Food & Dining</option>
-                <option value="Transport">Transport</option>
-                <option value="Entertainment">Entertainment</option>
-                <option value="Bills">Bills & Utilities</option>
-                <option value="Other">Other</option>
-            </select>
-            <button type="submit">Add Transaction</button>
-        </form>
+        <section class="summary-card">
+            <div class="balance">
+                <small>Total Spent</small>
+                <h2>$<span id="total-amount">0.00</span></h2>
+            </div>
+            <div class="chart-container">
+                <canvas id="expenseChart"></canvas>
+            </div>
+        </section>
 
-        <div class="history-header">
-            <h4>History</h4>
-        </div>
-        <ul id="expense-list">
-            </ul>
+        <section class="input-section">
+            <form id="expense-form">
+                <div class="input-group">
+                    <input type="text" id="desc" placeholder="What did you buy?" required>
+                    <input type="number" id="amount" placeholder="0.00" step="0.01" required>
+                </div>
+                <div class="input-group">
+                    <select id="category">
+                        <option value="Food">Food & Dining</option>
+                        <option value="Transport">Transport</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="Utilities">Utilities</option>
+                        <option value="Shopping">Shopping</option>
+                    </select>
+                    <button type="submit" id="add-btn">Add Expense</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="history-section">
+            <div class="section-header">
+                <h3>Recent Transactions</h3>
+                <button id="clear-all" class="text-btn">Clear All</button>
+            </div>
+            <ul id="expense-list"></ul>
+        </section>
     </div>
     <script src="script.js"></script>
 </body>
 </html>
-<script src="script.js"></script>
